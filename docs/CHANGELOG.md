@@ -4,6 +4,40 @@
 
 ## [Unreleased]
 
+### Fix (2026-08-20)
+
+#### 连词框双击编辑显示空文本 (user-requested: 「连词框无法正常双击输入文字」)
+
+排查结论：真实浏览器双击（dblclick）能正常到达连词节点并进入编辑态（React Flow `onNodeDoubleClick` 正常），但 `LinkingPhraseNode` 进入编辑态后文本渲染为空——编辑态 JSX 是 `{!editing && data.text}`（空内容），useEffect 只 focus 未填回文本（对比 `ConceptNode` 有 `el.textContent = data.text`）。用户双击后看到文字消失，误以为「无法输入」。
+
+- `LinkingPhraseNode.tsx` 编辑态对齐 `ConceptNode` 成熟实现：`el.textContent = data.text` 填回当前文本 + rAF 重试 focus（最多 30 次，等 React Flow 节点可见再聚焦）+ 全选。
+- 新增回归测试「编辑态填回当前文本（双击后不出现空框）」；测试 148/148 全绿、`npm run build` 通过。
+- 本地冒烟（`dispatchEvent` 派发真实 dblclick）+ 线上冒烟（拖线建连词 → 双击 → 编辑态 `textContent='???'` 填回 → 输入 `NEXT` → Enter 提交成功）全绿。
+- **排查方法论沉淀**：playwright 的两次 `mouse.click()` 不产生浏览器级 dblclick（用普通 div 对照实验确认——合成事件不会自动生成 dblclick），此前「双击无反应」是测试方法假象；真实用户浏览器双击正常。冒烟脚本模拟双击改用 `dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))`。
+
+### Deploy (2026-08-20)
+
+#### 部署连词编辑修复到 CloudBase 静态托管 (`deployed`)
+
+- `npm run build`（148/148 全绿）→ `uploadFiles(localPath=d:\AI\概念地图项目\dist, cloudPath=/)` 上传 9 文件全 200。
+- 线上验证：`curl | findstr assets` 确认线上引用 `index-DWeryFMQ.js` + `index-CgZPgevn.css` 与本地 dist 一致。
+- 线上冒烟 `smoke-lp-online.js`：真实拖线创建连词 → 双击连词 → 编辑态 `textContent='???'`（填回）→ 输入 `NEXT` + Enter → DOM 显示 `NEXT`，全链路 ok。
+
+### Feat (2026-08-20)
+
+#### 邮箱注册并登录完整闭环（user-requested: 「通过邮箱注册并登录」）
+
+在既有「邮箱+密码 登录/注册」基础上补齐「注册 → 邮箱确认 → 登录」完整闭环：
+
+- 新建 `src/authErrors.ts`：Supabase Auth 错误中文化纯函数 `translateAuthError`（按 error.code + message 关键词双路匹配）+ `isEmailUnconfirmedError` 判定，覆盖凭据错误/邮箱未确认/已注册/密码过短/邮箱格式/限流/用户不存在等常见错误。
+- `cloudSync.ts`：`signUpWithEmail` 改为返回 `{ user, needConfirm }`（项目开启邮件确认时注册无会话 → 提示确认而非当作失败）；新增 `resendConfirmationEmail`（官方 `auth.resend({ type:'signup' })` API）；登录/退出错误统一中文化。
+- `LoginModal.tsx` 三态重构：登录 / 注册（新增确认密码字段，二次输入不一致本地校验）/ 邮箱确认成功态（绿色提示「确认邮件已发送到 xxx」+ 重新发送确认邮件 + 去登录）；登录遇「邮箱未确认」错误时内联提供「重新发送确认邮件」引导。
+- `App.css` 新增 `.cm-modal__success` / `__note` / `__body` 确认态样式。
+- 输入框补 `data-testid`（`email-input` / `password-input` / `confirm-password-input` / `resend-btn` / `resend-hint-btn`）供冒烟定位。
+- 测试 147/147 全绿（新增 `authErrors.test.ts` 10 用例），`npm run build` 通过。
+- Playwright 冒烟 `smoke-auth.js` `ok:true`：登录弹窗/注册模式/确认密码字段/密码不一致校验/注册→「请确认邮箱」成功态（route mock 确定性验证）+ 重发按钮存在。真实网络另实测错误中文化生效（example.com 被服务端拒 →「邮箱格式不正确」；普通域名触发邮件限流 →「操作过于频繁，请稍后再试」）。
+- **踩坑（写入经验库）**：① Supabase 服务端默认拒绝 `example.com` 域名注册（400 `Email address ... is invalid`），自测须用普通域名；② 未配置自定义 SMTP 时注册确认邮件受内置邮件服务限流（429 rate limit）；③ 官方 API 名是 `supabase.auth.resend({ type:'signup' })`，不是 `resendEmail`（supabase-js 2.112.3 无此方法）。
+
 ### Refactor (2026-08-20)
 
 #### 统计角标改为左上角透明浮动 (user-requested: 「统计信息就别弄一栏了吧，看着突兀的很，左上角单独透明浮在那就好」)
