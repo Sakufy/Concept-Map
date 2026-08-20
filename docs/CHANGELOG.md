@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Deploy (2026-08-20)
+
+#### 部署 UI 清爽化到 CloudBase 静态托管 (`deployed`)
+
+- `npm run build`（tsc + vite，137/137 测试全绿）→ `uploadFiles(localPath=dist, cloudPath=/)` 上传 9 个文件。
+- 线上验证：`curl | findstr assets` 确认线上 HTML 引用 `index-DXfJg-53.js` + `index-DzRHcRPu.css` 与本地 dist 一致。
+- 线上冒烟：`smoke-online.js` `ok:true`（重命名/本地文件夹/删除回根目录）；`smoke-header-online.js` `ok:true`（状态 chip / 我的地图 / ⋯ 菜单 4 项 / 外部点击关闭 / 删除按钮 hover 显隐）。
+- 提交 `4fdfadc` 并推送 GitHub（`4dbe158..4fdfadc main -> main`）。
+
 ### Refactor (2026-08-20)
 
 #### 管理 UI 清爽化 — Header 三段式 + 内联 SVG 图标 + 删除 hover 隐藏 (user-requested: "清爽、简洁且美观")
