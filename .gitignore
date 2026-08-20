@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# Vite cache
+.vite/
+
 # Editor
 .vscode/
 .idea/
@@ -30,5 +33,6 @@ Thumbs.db
 smoke-*.js
 smoke-*.png
 phase*.png
+v2-*.png
 fix-connect.png
 hover-nodeA.png
