@@ -40,6 +40,7 @@ docs/           # 管理文档（ROADMAP / TASKS / CHANGELOG / ADR）
 7. **质量门禁（DoD）**：build 通过、测试通过、已更新 CHANGELOG、关键交互经一次冒烟验证。
 8. **提交规范**：Conventional Commits —— `feat:` `fix:` `refactor:` `docs:` `test:` `chore:`。
 9. **变更记录**：每次有实质产出，必须在 `docs/CHANGELOG.md` 追加记录，并在 `.codebuddy/memory/` 写入工作记忆。
+10. **先查经验库**：动手前按环节先查 `docs/开发经验与避坑指南.md` 对应章节（React Flow / 测试冒烟 / 部署 / Git 推送）；遇到新坑解决后**提炼进该文档**，不只写日志流水账。
 
 ## 常用命令
 

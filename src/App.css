@@ -70,34 +70,156 @@
   opacity: 0.8;
 }
 
-/* ---- 头部操作区（保存状态 + 导入导出） ---- */
+/* ---- 头部操作区（清爽版：状态 chip + 用户区 + ⋯ 聚合菜单） ---- */
 .app-header__actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-left: auto;
 }
 
+/* 保存状态 chip：信息态，浅底胶囊，非操作按钮 */
 .app-header__save-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
   font-size: 12px;
-  opacity: 0.85;
+  color: rgba(255, 255, 255, 0.92);
   font-variant-numeric: tabular-nums;
 }
 
-.app-header__btn {
+.app-header__save-state::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  flex-shrink: 0;
+}
+
+/* 通用按钮：无边框透明底，hover 才显底色（轻盈、去边框噪音） */
+.app-header__btn,
+.app-header__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   height: 30px;
-  padding: 0 14px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
   color: #fff;
   font-size: 12px;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
-.app-header__btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+.app-header__icon-btn {
+  width: 30px;
+  padding: 0;
+  justify-content: center;
+}
+
+.app-header__btn:hover,
+.app-header__icon-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* 已登录用户按钮：头像 + 邮箱 + 下拉箭头 */
+.app-header__menu-wrap {
+  position: relative;
+}
+
+.app-header__user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px 0 4px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.app-header__user-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.app-header__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  color: #2b3a55;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.app-header__user-email {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- 下拉菜单（头像 / ⋯ 通用） ---- */
+.cm-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 60;
+  min-width: 168px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cm-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: #334155;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.cm-dropdown__item:hover {
+  background: #f1f5f9;
+}
+
+.cm-dropdown__item svg {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.cm-dropdown__sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: #e2e8f0;
 }
 
 .app-main {
@@ -681,19 +803,20 @@
   }
 }
 
-/* ---- 云同步：头部用户/同步提示 ---- */
-.app-header__user {
-  max-width: 180px;
-  font-size: 12px;
-  opacity: 0.9;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
+/* ---- 云同步：头部同步提示 ---- */
 .app-header__sync-msg {
   font-size: 12px;
   color: #fbbf24;
+}
+
+/* 窄屏：头像菜单只留头像，隐藏邮箱文字 */
+@media (max-width: 640px) {
+  .app-header__user-email {
+    display: none;
+  }
+  .app-header__hint {
+    display: none;
+  }
 }
 
 /* ---- 登录/注册弹窗 ---- */
@@ -1140,6 +1263,16 @@
   color: #dc2626;
   font-size: 12px;
   cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* 破坏性操作默认隐藏，hover / 键盘聚焦行时出现（降低误触与视觉噪音） */
+.cm-maps__item:hover .cm-maps__del,
+.cm-maps__item:focus-within .cm-maps__del,
+.cm-maps__group:hover .cm-maps__del,
+.cm-maps__group:focus-within .cm-maps__del {
+  opacity: 1;
 }
 
 .cm-maps__del:hover {
@@ -1149,6 +1282,13 @@
 .cm-maps__del:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* 触屏设备无 hover：始终显示删除按钮 */
+@media (hover: none) {
+  .cm-maps__del {
+    opacity: 1;
+  }
 }
 
 .cm-maps__empty {

@@ -4,6 +4,30 @@
 
 ## [Unreleased]
 
+### Refactor (2026-08-20)
+
+#### 管理 UI 清爽化 — Header 三段式 + 内联 SVG 图标 + 删除 hover 隐藏 (user-requested: "清爽、简洁且美观")
+
+针对截图反馈「顶部一字排开 6+ 文字按钮、信息密度过高」做 UI 重构：
+
+- **HeaderActions 三段式重构**：右侧从 8 个等宽文字按钮精简为 3 元素——状态 chip（`● 已保存` 浅底胶囊+绿点） + 用户区（未登录=登录按钮；已登录=首字母圆形头像+邮箱下拉菜单 [本地地图/云端地图/退出登录]）+ `⋯` 聚合菜单（收纳导入/导出/保存版本/版本历史 4 个低频 I/O 与版本管理）。
+- **新增 `src/components/icons.tsx`**（内联 SVG，lucide 风格 MIT 授权路径）：Folder/More/ChevronDown/Download/Upload/Save/History/LogOut/User 共 9 个图标，stroke="currentColor" 继承父级颜色；不引入新 npm 依赖（遵守 AGENTS.md「不擅自引入新依赖」纪律）。
+- **下拉菜单通用化**：`.cm-dropdown` 白底圆角卡片+柔和阴影，菜单项 34px 高、icon+文字、hover 浅灰底；pointerdown 外部关闭 + Esc 关闭两个菜单（user/more 独立 state）。
+- **破坏性操作 hover 显隐**：`.cm-maps__del` 默认 opacity:0，`.cm-maps__item:hover` 或 `:focus-within` 时 opacity:1；`@media (hover:none)` 触屏设备始终显示（兜底）。
+- **按钮样式去边框噪音**：`.app-header__btn/icon-btn` 改为无边框+透明底+hover 浅白底（原来带 0.35 边框），圆角 8px 更现代。
+- 保留所有 `data-testid`（`local-maps-btn` / `more-menu-btn` / `versions-btn` 等）兼容现有冒烟脚本与测试；App.test.tsx「渲染导入导出按钮」用例更新为先点击 `more-menu-btn` 展开菜单再断言。
+- 测试 137/137 全绿、`npm run build` 通过。
+- Playwright 冒烟 `smoke-header-ui.js` `ok:true`：saveState=已保存 / hasMapsBtn / hasMoreBtn / directExport=false（导出不再平铺）/ menuItems 4 项 :true / menuIconCount=4 / 外部点击关闭 / hasFolderNew / delOpacityBefore=0 / delOpacityHover=1。截图 `smoke-header-moremenu.png` 视觉确认 Header 极简 + 菜单卡片化；`smoke-header-local.png` 列表 hover 后删除按钮显形。
+- **踩坑（写入经验库）**：冒烟脚本 `[].map((t) => async ...)` 回调里用 `await` 会因回调非 async → `Unexpected reserved word` → 改 for-of 循环或 `map(async (t) => ...)`；`node --check <file>` 冒烟脚本可快速定位 JS 语法错误，不必等 playwright 报错。
+
+### Docs (2026-08-20)
+
+#### 经验库建立 — 开发/测试/部署/Git 全环节避坑指南 (`added`)
+
+- 新增 `docs/开发经验与避坑指南.md`：把散落在 CHANGELOG / memory / 本仓库的**全部踩坑经验**系统化——按「开发环境 / React Flow 画布 / 状态管理 / 测试冒烟 / 部署上线 / Git 提交推送 / 用户反馈排查」7 大环节分类，每条统一「现象 → 根因 → 解法 → 预防」格式，附快速检查清单。
+- 沉淀的关键方法论：① **nodeLookup 原地 mutate → shallow 数组订阅**；② **功能开发后必须重新部署**（用户"线上没新功能"第一嫌疑）；③ 线上版本验证排查链 `curl|findstr assets` 对比文件名 → playwright 线上实测 → 用户硬刷新；④ GitHub 直连超时 → 探测本机代理（Clash 7890）→ `git -c http.proxy` 临时代理推送（不改 config）；⑤ Windows 中文 commit 必须 `git commit -F <utf8文件>`。
+- 登记进 `docs/README.md` 文档地图（L3 经验库，中频更新，AI 必须维护）；`AGENTS.md` 新增纪律第 10 条「先查经验库」。
+
 ### Added (2026-08-20)
 
 #### 概念图重命名 + 我的地图文件夹分组 (`completed`)

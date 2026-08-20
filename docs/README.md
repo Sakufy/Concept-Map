@@ -15,7 +15,8 @@
 ├── docs/
 │   ├── README.md                    ← 【本文档】文档索引与维护指南
 │   ├── CHANGELOG.md                 ← L3·变更日志：每次有实质产出必追加
-│   └── Lynkage实现分析.md           ← L1·竞品逆向：Lynkage 实现方法（技术依据）
+│   ├── Lynkage实现分析.md           ← L1·竞品逆向：Lynkage 实现方法（技术依据）
+│   └── 开发经验与避坑指南.md        ← L3·经验库：全环节踩坑 → 根因 → 解法 → 预防（动手前先查）
 ├── iterations/
 │   └── v1-launch/
 │       ├── PRD.md                   ← L2·产品需求：本次迭代做什么、不做什么
@@ -38,6 +39,7 @@
 | `AI辅助开发管理方案.md` | 方法论 | 极低 | 协作流程本身调整时 | 人 |
 | `docs/CHANGELOG.md` | 变更日志 | **每次实质产出** | 功能完成/修 bug/重构后，在 `## [Unreleased]` 下按日期追加 | AI（必须） |
 | `docs/Lynkage实现分析.md` | 技术依据 | 极低 | 新竞品调研时才动 | AI |
+| `docs/开发经验与避坑指南.md` | 经验库 | 中 | 每次遇到新坑提炼进对应章节；动手前先查对应环节 | AI（必须） |
 | `iterations/v1-launch/PRD.md` | 迭代需求 | 每轮迭代 | 新一轮迭代规划时 | 人 + AI |
 | `iterations/v1-launch/.plan/plan.md` | 全项目航图 | **每个阶段/专项结束** | 阶段状态表 +「关键决策」节追加 | AI（必须） |
 | `iterations/v1-launch/.plan/phases/NN-*.md` | 阶段详情 | 每个 phase 内 | Gate 状态 / 自测记录 / 用户验收 | AI |

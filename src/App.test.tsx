@@ -57,9 +57,11 @@ describe('App 外壳', () => {
     expect(useCmapStore.getState().doc.concepts).toHaveLength(1);
   });
 
-  it('渲染保存状态与导入导出按钮', () => {
+  it('渲染保存状态与导入导出按钮（导入导出收进 ⋯ 聚合菜单）', () => {
     render(<App />);
     expect(screen.getByText('已保存')).toBeInTheDocument();
+    // 低频 I/O 操作收拢在 ⋯ 菜单中，展开后可见
+    fireEvent.click(screen.getByTestId('more-menu-btn'));
     expect(screen.getByTitle('导出当前概念图为 JSON 文件')).toBeInTheDocument();
     expect(screen.getByTitle('从 JSON 文件导入概念图')).toBeInTheDocument();
   });
