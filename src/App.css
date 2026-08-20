@@ -1117,6 +1117,30 @@
   color: #d32f2f;
 }
 
+.cm-modal__success {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.cm-modal__note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+.cm-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .cm-modal__actions {
   display: flex;
   gap: 8px;

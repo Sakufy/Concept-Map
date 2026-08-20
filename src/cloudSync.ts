@@ -7,6 +7,7 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { createEmptyDocument, type CmapDocument } from './types/cmap';
 import type { CloudFolderMeta, CloudMapMeta, CloudUser } from './store/authStore';
+import { translateAuthError } from './authErrors';
 
 /** 云端未配置时统一抛出可读错误 */
 function assertConfigured(): void {
@@ -18,27 +19,38 @@ function assertConfigured(): void {
 export async function signInWithEmail(email: string, password: string): Promise<CloudUser> {
   assertConfigured();
   const { data, error } = await supabase!.auth.signInWithPassword({ email, password });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(translateAuthError(error));
   if (!data.user) throw new Error('登录失败：未获取到用户信息');
   return { id: data.user.id, email: data.user.email ?? email };
 }
 
-export async function signUpWithEmail(email: string, password: string): Promise<CloudUser> {
+export interface SignUpResult {
+  user: CloudUser;
+  /** 项目开启邮件确认时注册不会建立会话，需用户点击确认邮件后才能登录 */
+  needConfirm: boolean;
+}
+
+export async function signUpWithEmail(email: string, password: string): Promise<SignUpResult> {
   assertConfigured();
   const { data, error } = await supabase!.auth.signUp({ email, password });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(translateAuthError(error));
   if (!data.user) throw new Error('注册失败：未获取到用户信息');
-  // 项目开启邮件确认时 signup 不会建立会话，提示用户去收件箱确认
-  if (!data.session) {
-    throw new Error('注册成功，请查收邮件完成邮箱确认后再登录');
-  }
-  return { id: data.user.id, email: data.user.email ?? email };
+  const user: CloudUser = { id: data.user.id, email: data.user.email ?? email };
+  // 开启邮件确认时 data.session 为 null → 提示用户去收件箱确认，而非当作注册失败
+  return { user, needConfirm: !data.session };
+}
+
+/** 重新发送注册确认邮件（Supabase 官方 resend API） */
+export async function resendConfirmationEmail(email: string): Promise<void> {
+  assertConfigured();
+  const { error } = await supabase!.auth.resend({ type: 'signup', email });
+  if (error) throw new Error(translateAuthError(error));
 }
 
 export async function signOut(): Promise<void> {
   assertConfigured();
   const { error } = await supabase!.auth.signOut();
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(translateAuthError(error));
 }
 
 interface MapRow {
