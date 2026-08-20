@@ -76,6 +76,13 @@ describe('LinkingPhraseNode 连词节点组件', () => {
     expect(useCmapStore.getState().editingLpId).toBe('lp-1');
   });
 
+  it('编辑态填回当前文本（双击后不出现空框）', () => {
+    // 回归：修复前编辑态渲染空内容且不填回 data.text，双击后文字消失
+    renderLp({ ...baseProps, data: { ...baseProps.data, text: '导致' } });
+    fireEvent.doubleClick(document.querySelector('.cm-lp__text')!);
+    expect(document.querySelector('.cm-lp__text')?.textContent).toBe('导致');
+  });
+
   it('输入文本后回车提交到 store 并退出编辑', async () => {
     useCmapStore.getState().setEditingLpId('lp-1');
     const user = userEvent.setup();

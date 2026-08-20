@@ -29,15 +29,32 @@ export function LinkingPhraseNode({ id, data, selected }: NodeProps<LinkingPhras
     setEditModalTarget({ type: 'linkingPhrase', id });
   };
 
+  // 进入编辑态：填入当前文本 + focus + 全选（对齐 ConceptNode 成熟实现）
+  // 注意：React Flow 节点测量完成前 visibility:hidden，hidden 元素 focus 无效，
+  // 因此用 rAF 重试直到节点可见再聚焦。
   useEffect(() => {
-    if (editing && textRef.current) {
-      textRef.current.focus();
+    if (!editing) return;
+    const el = textRef.current;
+    if (!el) return;
+    el.textContent = data.text;
+    let attempts = 0;
+    const tryFocusAndSelect = () => {
+      el.focus();
+      if (document.activeElement !== el) {
+        if (attempts < 30) {
+          attempts++;
+          requestAnimationFrame(tryFocusAndSelect);
+        }
+        return;
+      }
       const range = document.createRange();
-      range.selectNodeContents(textRef.current);
+      range.selectNodeContents(el);
       const sel = window.getSelection();
       sel?.removeAllRanges();
       sel?.addRange(range);
-    }
+    };
+    tryFocusAndSelect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editing]);
 
   const commit = () => {
