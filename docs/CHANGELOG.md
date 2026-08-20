@@ -6,6 +6,28 @@
 
 ### Refactor (2026-08-20)
 
+#### 统计角标改为左上角透明浮动 (user-requested: 「统计信息就别弄一栏了吧，看着突兀的很，左上角单独透明浮在那就好」)
+
+针对「底部统计栏突兀」反馈，删除卡片化底栏，改为左上角透明浮动：
+
+- `MapStats.tsx` 改用 React Flow `<Panel position="top-left">` 渲染，与工具栏共用同一定位体系（左/中 Panel 一致）。
+- `.cm-stats` 去卡片化：移除 `background / border / border-radius / box-shadow / backdrop-filter`，仅保留 `padding: 4px 8px` + 文字 `text-shadow`（浅色模式白色阴影 / 深色模式黑色阴影）保证画布上的可读性。
+- 加 `pointer-events: none`：纯展示，不拦截画布点击/拖拽。
+- 元素/数字样式（`.cm-stats__item` / `__num`）保留，深色主题色彩同步适配。
+- 测试 137/137 全绿、`npm run build` 通过。
+- Playwright 冒烟（本地 `smoke-v2-ui.js` + 线上 `smoke-v2-online.js`）核心断言 `statsTopLeft` 通过：`position: absolute` + 背景透明 + 视口左上角。
+- **踩坑（写入经验库）**：React Flow v12 Panel 用 `margin: 15px` 定位而非 `top/left`（computed top/left = 0px，视觉偏移靠 margin），冒烟断言不能用 `cs.top === '10px'` → 改 `position: absolute` + `r.left < 40 && r.top < 120`（基于 `getBoundingClientRect` 直接验证视口位置）。
+
+### Deploy (2026-08-20)
+
+#### 部署统计角标改动到 CloudBase 静态托管 (`deployed`)
+
+- `npm run build`（137/137 全绿）→ `uploadFiles(localPath=d:\AI\概念地图项目\dist, cloudPath=/)` 上传 9 文件全 200。
+- 线上验证：`curl | findstr assets` 确认线上引用 `index-PmwX54js.js` + `index-L0Xz6VMy.css` 与本地 dist 一致。
+- 线上冒烟：`smoke-v2-online.js` 核心断言 `statsTopLeft: true` 通过；浅色 Header / 主动态浅蓝 / 整理按钮启用 / 整理下拉/图标/外部关闭 / 深色主题 Header 全部 `true`（线上截图 `smoke-v2-online.png` 视觉确认统计透明浮在左上角、底部无栏）。
+
+### Refactor (2026-08-20)
+
 #### 整体观感统一 — 设计 token + 浅色 Header + 主动态浅蓝 + 磨砂玻璃 (user-requested: "简约、高端的感觉。整体要风格统一")
 
 针对截图反馈「整理功能 UI 布局 + 整体观感需优化」，按「简约、高端、风格统一」方向做全量系统化改造：
