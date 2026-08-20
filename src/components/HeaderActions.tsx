@@ -20,8 +20,10 @@ import {
   IconFolder,
   IconHistory,
   IconLogOut,
+  IconMoon,
   IconMore,
   IconSave,
+  IconSun,
   IconUpload,
   IconUser,
 } from './icons';
@@ -38,6 +40,8 @@ interface Props {
 export function HeaderActions({ saveState, syncMsg }: Props) {
   const doc = useCmapStore((s) => s.doc);
   const setDoc = useCmapStore((s) => s.setDoc);
+  const setConfig = useCmapStore((s) => s.setConfig);
+  const isDark = useCmapStore((s) => s.doc.config.theme === 'dark');
   const user = useAuthStore((s) => s.user);
   const uiMode = useAuthStore((s) => s.uiMode);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -106,6 +110,12 @@ export function HeaderActions({ saveState, syncMsg }: Props) {
   const goLocal = () => {
     setOpenMenu(null);
     useAuthStore.getState().setUiMode('local');
+  };
+
+  /** 主题切换：写入 doc.config（随文档持久化，原底部统计栏按钮迁移至此） */
+  const toggleTheme = () => {
+    setOpenMenu(null);
+    setConfig({ theme: isDark ? 'default' : 'dark' });
   };
   const goMaps = () => {
     setOpenMenu(null);
@@ -237,6 +247,17 @@ export function HeaderActions({ saveState, syncMsg }: Props) {
             >
               <IconHistory />
               <span>版本历史</span>
+            </button>
+            <div className="cm-dropdown__sep" />
+            <button
+              className="cm-dropdown__item"
+              title={isDark ? '切换到浅色主题' : '切换到深色主题'}
+              aria-pressed={isDark}
+              onClick={toggleTheme}
+              data-testid="theme-toggle-btn"
+            >
+              {isDark ? <IconSun /> : <IconMoon />}
+              <span>{isDark ? '浅色模式' : '深色模式'}</span>
             </button>
           </div>
         )}

@@ -103,3 +103,98 @@ export function IconUser({ size = 15 }: IconProps) {
     </svg>
   );
 }
+
+/* ---------- 画布工具栏图标（lucide 风格） ---------- */
+
+export function IconHand({ size = 16 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <path d="M18 11V6a2 2 0 0 0-4 0v5" />
+      <path d="M14 10V4a2 2 0 0 0-4 0v2" />
+      <path d="M10 10.5V6a2 2 0 0 0-4 0v8" />
+      <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+    </svg>
+  );
+}
+
+export function IconMousePointer2({ size = 16 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <path d="M4 4l7.07 17 2.51-7.39L21 11.07z" />
+    </svg>
+  );
+}
+
+export function IconRoute({ size = 16 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <circle cx="6" cy="19" r="3" />
+      <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
+      <circle cx="18" cy="5" r="3" />
+    </svg>
+  );
+}
+
+export function IconLayoutGrid({ size = 16 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <rect width="7" height="7" x="3" y="3" rx="1" />
+      <rect width="7" height="7" x="14" y="3" rx="1" />
+      <rect width="7" height="7" x="14" y="14" rx="1" />
+      <rect width="7" height="7" x="3" y="14" rx="1" />
+    </svg>
+  );
+}
+
+export function IconMaximize2({ size = 16 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <polyline points="15 3 21 3 21 9" />
+      <polyline points="9 21 3 21 3 15" />
+      <line x1="21" x2="14" y1="3" y2="10" />
+      <line x1="3" x2="10" y1="21" y2="14" />
+    </svg>
+  );
+}
+
+export function IconUndo2({ size = 16 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
+    </svg>
+  );
+}
+
+export function IconRedo2({ size = 16 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <path d="m15 14 5-5-5-5" />
+      <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
+    </svg>
+  );
+}
+
+export function IconSun({ size = 15 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+  );
+}
+
+export function IconMoon({ size = 15 }: IconProps) {
+  return (
+    <svg {...baseProps(size)}>
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  );
+}

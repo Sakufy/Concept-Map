@@ -147,18 +147,21 @@ describe('App 外壳', () => {
     expect(document.querySelectorAll('.cm-stats__num')[0]?.textContent).toBe('1');
   });
 
-  it('主题切换按钮切换深色/浅色并写入 doc.config', async () => {
+  it('⋯ 菜单主题切换切换深色/浅色并写入 doc.config', async () => {
     const user = userEvent.setup();
     render(<App />);
-    const themeBtn = screen.getByRole('button', { name: '切换主题' });
     expect(useCmapStore.getState().doc.config.theme).toBe('default');
+
+    await user.click(screen.getByTestId('more-menu-btn'));
+    const themeBtn = screen.getByTestId('theme-toggle-btn');
     expect(themeBtn).toHaveAttribute('aria-pressed', 'false');
 
     await user.click(themeBtn);
     expect(useCmapStore.getState().doc.config.theme).toBe('dark');
-    expect(themeBtn).toHaveAttribute('aria-pressed', 'true');
 
-    await user.click(themeBtn);
+    // 切换后菜单关闭，需重新展开再切回浅色
+    await user.click(screen.getByTestId('more-menu-btn'));
+    await user.click(screen.getByTestId('theme-toggle-btn'));
     expect(useCmapStore.getState().doc.config.theme).toBe('default');
   });
 

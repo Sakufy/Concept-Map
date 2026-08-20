@@ -29,6 +29,27 @@
 - Playwright 冒烟 `smoke-header-ui.js` `ok:true`：saveState=已保存 / hasMapsBtn / hasMoreBtn / directExport=false（导出不再平铺）/ menuItems 4 项 :true / menuIconCount=4 / 外部点击关闭 / hasFolderNew / delOpacityBefore=0 / delOpacityHover=1。截图 `smoke-header-moremenu.png` 视觉确认 Header 极简 + 菜单卡片化；`smoke-header-local.png` 列表 hover 后删除按钮显形。
 - **踩坑（写入经验库）**：冒烟脚本 `[].map((t) => async ...)` 回调里用 `await` 会因回调非 async → `Unexpected reserved word` → 改 for-of 循环或 `map(async (t) => ...)`；`node --check <file>` 冒烟脚本可快速定位 JS 语法错误，不必等 playwright 报错。
 
+### Refactor (2026-08-20)
+
+#### 工具栏清爽化 — 三段式卡片 + lucide SVG 图标 + 整理下拉 + toast + 主题迁菜单 (user-requested: 「操作栏也优化一下ui」)
+
+针对截图反馈「顶部一字排开 4 组按钮密度高、emoji 图标与 Header 不统一」做 UI + 行为重构：
+
+- **三段式卡片化布局**（`.cm-toolbar`）：左组（视图工具 pan/select，纯图标 + tooltip，互斥单选）/ 中组（选中节点 NodeStylePanel，仅单选时显示）/ 右组（编辑与视图操作）。卡片背景半透明 + 深色主题适配。
+- **lucide SVG 图标统一**：`icons.tsx` 新增 9 个工具栏图标（Hand / MousePointer2 / Route / LayoutGrid / Maximize2 / Undo2 / Redo2 / Sun / Moon），替换原有 emoji（✋/▭/⚡/↩/↪/▦/⤢/⤓），与 Header 已统一的图标风格保持一致。
+- **整理按钮变 split-button 下拉**：主按钮执行 dagre 分层整理（默认，可撤销），右侧 caret 展开下拉两个变体——「分层整理」（主按钮同款）+「整理并适应」（整理后自动 fitView）。空图状态下按钮 + caret 同步禁用。
+- **撤销/重做快捷键可见**：label 后追加 `<kbd>` 小标签展示 `Z` / `⇧Z`，移动端自动隐藏（与 label 同步）。
+- **PNG 失败改 toast**：`alert(err)` → 顶部轻 toast（`.cm-toast` 淡入 + 3 秒自动消失），避免打断用户；与 Header `saveState` chip 共享视觉通道（顶部居中 + 深底白字）。
+- **`pathMode` 解耦**：从原「工具组」（与 pan/select 同级）迁出到「操作组」，强调它是视图态开关而非鼠标语义；按钮文案 `路径中` / `路径` 沿用激活态。
+- **`100%` 缩放读数移除**：工具栏原本挤在按钮群里的 zoom 百分比读数删除，左下角 React Flow 官方 `<Controls showInteractive={false}>` 承担缩放控制（+ / − / 适应 / 锁定），职责清晰不重复。
+- **统计栏纯数据化**：移除底部「深色/浅色」按钮，统计栏只保留 `N 概念 / N 连词 / N 连接` 三个数据项；主题切换迁移到 Header ⋯ 菜单底部（与版本历史之后，sep 分隔），icon 跟随状态切换 Sun/Moon，aria-pressed 指示当前态。
+- **样式面板 chip 化**：字号 `13px` 纯文本改为带浅底 chip（更清晰）；色块选中 ring 改用主题蓝（#1976d2 + ring shadow）替代纯黑。
+- **测试更新**：「主题切换」用例改为走 ⋯ 菜单（开 `more-menu-btn` → 点 `theme-toggle-btn` → 断言 `doc.config.theme` 切换 + 切换后菜单关闭需重开），其他 12 个 App.test.tsx 用例不受影响；`App.test.tsx` 13/13 全绿。
+- 工具按钮新增 `data-testid="tool-pan"` / `"tool-select"`，caret 加 `"auto-layout-caret"` 便于冒烟断言。
+- Playwright 冒烟 `smoke-toolbar-ui.js` `ok:true`：hasToolbar / toolPan / toolSelect / pathBtn / layoutBtn / caretBtn / pngBtn / `noZoomReadout` / `hasControls` / `kbdCount=2` / `layoutMenuItems` 2 项 / `layoutMenuClosed` / 工具互斥激活 / `themeItem=深色模式` / `darkAfterToggle` / `noStatsBtn` / `statsNum=3` / `lightAfterToggleBack`。截图 `smoke-toolbar-final.png` 视觉确认三段式卡片 + split-button 下拉 + 深色主题。
+- **整理二选方案调整说明**：原计划「保留位置」/「全量重排」二选下拉，但 dagre 算法是全量重排（官方无增量模式），「保留位置」语义无法实现 → 改为「分层整理」/「整理并适应」二选（都是有效变体且不误导用户），结果可通过 zundo 撤销回退。
+- **踩坑**：① dev server 未启动时直接 `playwright-cli run-code` 报 connect refused；用 `Start-Process -WindowStyle Hidden npm.cmd run dev` 后台启动（带 `.dev-server.log` / `.dev-server.err.log` 重定向），等 6 秒再 `curl 200` 探测；② 空图时整理按钮 disabled（`doc.concepts.length===0`）——冒烟开头用 `window.__cmapStore.getState().addConcept(...)` 构造 3 个概念节点绕过（dev 模式暴露 store 是已有成熟方案，避免 dblclick 坐标被节点覆盖）；③ 整理按钮 polish：第一版 caret `margin-left:-6px` 让 chevron 视觉过弱（被主按钮圆角遮盖）→ 改为 split-button 风格（主按钮 `border-radius: 8px 0 0 8px` + caret `border-radius: 0 8px 8px 0` + `border-left` 分隔线）。
+
 ### Docs (2026-08-20)
 
 #### 经验库建立 — 开发/测试/部署/Git 全环节避坑指南 (`added`)
