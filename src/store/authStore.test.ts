@@ -33,7 +33,9 @@ describe('authStore（云同步 UI 状态）', () => {
   });
 
   it('云端地图列表 / cloudMapId / 云端版本号可更新', () => {
-    useAuthStore.getState().setCloudMaps([{ id: 'm1', title: '图1', updatedAt: '2026-08-20T00:00:00Z' }]);
+    useAuthStore.getState().setCloudMaps([
+      { id: 'm1', title: '图1', updatedAt: '2026-08-20T00:00:00Z', folderId: null },
+    ]);
     expect(useAuthStore.getState().cloudMaps).toHaveLength(1);
     expect(useAuthStore.getState().cloudMaps[0].title).toBe('图1');
 

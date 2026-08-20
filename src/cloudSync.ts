@@ -6,7 +6,7 @@
  */
 import { supabase, isSupabaseConfigured } from './supabase';
 import { createEmptyDocument, type CmapDocument } from './types/cmap';
-import type { CloudMapMeta, CloudUser } from './store/authStore';
+import type { CloudFolderMeta, CloudMapMeta, CloudUser } from './store/authStore';
 
 /** 云端未配置时统一抛出可读错误 */
 function assertConfigured(): void {
@@ -45,30 +45,36 @@ interface MapRow {
   id: string;
   title: string;
   updated_at: string;
+  folder_id: string | null;
 }
 
 export async function listCloudMaps(): Promise<CloudMapMeta[]> {
   assertConfigured();
   const { data, error } = await supabase!
     .from('maps')
-    .select('id, title, updated_at')
+    .select('id, title, updated_at, folder_id')
     .order('updated_at', { ascending: false });
   if (error) throw new Error(error.message);
-  return (data as MapRow[]).map((m) => ({ id: m.id, title: m.title, updatedAt: m.updated_at }));
+  return (data as MapRow[]).map((m) => ({
+    id: m.id,
+    title: m.title,
+    updatedAt: m.updated_at,
+    folderId: m.folder_id ?? null,
+  }));
 }
 
 /** 新建云端地图（空文档），返回元信息 */
-export async function createCloudMap(title: string): Promise<CloudMapMeta> {
+export async function createCloudMap(title: string, folderId: string | null = null): Promise<CloudMapMeta> {
   assertConfigured();
   const doc = createEmptyDocument(title);
   const { data, error } = await supabase!
     .from('maps')
-    .insert({ title, data: doc as unknown as Record<string, unknown> })
-    .select('id, title, updated_at')
+    .insert({ title, data: doc as unknown as Record<string, unknown>, folder_id: folderId })
+    .select('id, title, updated_at, folder_id')
     .single();
   if (error) throw new Error(error.message);
   const m = data as MapRow;
-  return { id: m.id, title: m.title, updatedAt: m.updated_at };
+  return { id: m.id, title: m.title, updatedAt: m.updated_at, folderId: m.folder_id ?? null };
 }
 
 /** 加载云端地图整图数据 */
@@ -115,5 +121,51 @@ export async function saveMapToCloud(
 export async function deleteCloudMap(id: string): Promise<void> {
   assertConfigured();
   const { error } = await supabase!.from('maps').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+// ---------------------------------------------------------------------------
+// 云端文件夹（「我的地图」分组，单层结构；删除文件夹时地图移回根目录）
+// ---------------------------------------------------------------------------
+
+export async function listCloudFolders(): Promise<CloudFolderMeta[]> {
+  assertConfigured();
+  const { data, error } = await supabase!
+    .from('folders')
+    .select('id, name')
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data as CloudFolderMeta[]).map((f) => ({ id: f.id, name: f.name }));
+}
+
+/** 新建云端文件夹（同名返回已存在的） */
+export async function createCloudFolder(name: string): Promise<CloudFolderMeta> {
+  assertConfigured();
+  const trimmed = name.trim();
+  const existing = await listCloudFolders();
+  const dup = existing.find((f) => f.name === trimmed);
+  if (dup) return dup;
+  const { data, error } = await supabase!
+    .from('folders')
+    .insert({ name: trimmed || '新建文件夹' })
+    .select('id, name')
+    .single();
+  if (error) throw new Error(error.message);
+  return data as CloudFolderMeta;
+}
+
+/** 删除云端文件夹（文件夹内地图 folder_id 置空，不删除地图） */
+export async function deleteCloudFolder(id: string): Promise<void> {
+  assertConfigured();
+  const { error: updateError } = await supabase!.from('maps').update({ folder_id: null }).eq('folder_id', id);
+  if (updateError) throw new Error(updateError.message);
+  const { error } = await supabase!.from('folders').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+/** 把某张云端地图移动到文件夹（null = 根目录） */
+export async function setCloudMapFolder(mapId: string, folderId: string | null): Promise<void> {
+  assertConfigured();
+  const { error } = await supabase!.from('maps').update({ folder_id: folderId }).eq('id', mapId);
   if (error) throw new Error(error.message);
 }

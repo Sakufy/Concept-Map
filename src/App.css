@@ -20,6 +20,49 @@
 .app-header__title {
   font-size: 16px;
   font-weight: 600;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: 4px;
+  cursor: text;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 40vw;
+}
+
+.app-header__title:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.app-header__title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-header__title-edit {
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.app-header__title:hover .app-header__title-edit {
+  opacity: 0.85;
+}
+
+.app-header__title-input {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  background: #fff;
+  color: #1e293b;
+  width: min(40vw, 320px);
+  outline: none;
 }
 
 .app-header__hint {
@@ -1112,4 +1155,96 @@
   padding: 24px;
   font-size: 13px;
   color: #94a3b8;
+}
+
+/* ---- 我的地图：文件夹分组 ---- */
+.cm-maps__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.cm-maps__group:hover {
+  border-color: #cbd5e1;
+}
+
+.cm-maps__group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cm-maps__group-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.cm-maps__group-count {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.cm-maps__sublist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cm-maps__sublist .cm-maps__item {
+  padding: 8px 10px;
+  background: #f8fafc;
+}
+
+.cm-maps__group-empty {
+  margin: 0;
+  padding: 4px 0;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.cm-maps__folder-select {
+  height: 28px;
+  max-width: 150px;
+  padding: 0 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cm-maps__folder-select:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cm-maps__folder-input {
+  max-width: 720px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #1976d2;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.cm-maps__folder-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
 }

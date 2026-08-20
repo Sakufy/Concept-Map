@@ -18,15 +18,20 @@ vi.mock('idb-keyval', () => ({
 import {
   DOC_KEY,
   LAST_LOCAL_MAP_KEY,
+  LOCAL_FOLDERS_KEY,
   LOCAL_MAPS_KEY,
+  createLocalFolder,
   createLocalMap,
+  deleteLocalFolder,
   deleteLocalMap,
   getLastLocalMapId,
+  listLocalFolders,
   listLocalMaps,
   loadLocalMap,
   migrateLegacyDocument,
   saveLocalMap,
   setLastLocalMapId,
+  setLocalMapFolder,
 } from './persistence';
 
 /** 直接塞入一张文档（绕过 createLocalMap，用于构造差异化的 updatedAt） */
@@ -128,5 +133,63 @@ describe('本地多图持久化', () => {
 
   it('migrateLegacyDocument 无旧文档返回 null', async () => {
     expect(await migrateLegacyDocument()).toBeNull();
+  });
+});
+
+describe('本地文件夹管理', () => {
+  beforeEach(() => {
+    memoryStore.clear();
+  });
+
+  it('createLocalFolder 写入文件夹列表并排在最前', async () => {
+    const f = await createLocalFolder('数学');
+    expect(f.name).toBe('数学');
+    expect(memoryStore.get(LOCAL_FOLDERS_KEY)).toHaveLength(1);
+    const folders = await listLocalFolders();
+    expect(folders.map((x) => x.name)).toEqual(['数学']);
+  });
+
+  it('createLocalFolder 同名去重返回已存在的，空名称回退默认名', async () => {
+    const a = await createLocalFolder('物理');
+    const b = await createLocalFolder('物理');
+    expect(b.id).toBe(a.id);
+    expect(await listLocalFolders()).toHaveLength(1);
+    const empty = await createLocalFolder('   ');
+    expect(empty.name).toBe('新建文件夹');
+  });
+
+  it('setLocalMapFolder 把地图移入/移出文件夹', async () => {
+    const folder = await createLocalFolder('数学');
+    const meta = await createLocalMap('图A');
+    await setLocalMapFolder(meta.id, folder.id);
+    let maps = await listLocalMaps();
+    expect(maps[0].folderId).toBe(folder.id);
+    await setLocalMapFolder(meta.id, null);
+    maps = await listLocalMaps();
+    expect(maps[0].folderId).toBeNull();
+  });
+
+  it('deleteLocalFolder 删除文件夹并把其中地图移回根目录', async () => {
+    const folder = await createLocalFolder('数学');
+    const a = await createLocalMap('图A');
+    const b = await createLocalMap('图B');
+    await setLocalMapFolder(a.id, folder.id);
+    await setLocalMapFolder(b.id, folder.id);
+    await deleteLocalFolder(folder.id);
+    expect(await listLocalFolders()).toHaveLength(0);
+    const maps = await listLocalMaps();
+    expect(maps.every((m) => m.folderId === null)).toBe(true);
+    // 地图本身未被删除
+    expect(maps).toHaveLength(2);
+  });
+
+  it('listLocalMaps 对旧数据无 folderId 归一化为 null', async () => {
+    const meta = await createLocalMap('旧图');
+    // 模拟旧版元信息（无 folderId 字段）
+    const legacy = { ...meta } as Record<string, unknown>;
+    delete legacy.folderId;
+    memoryStore.set(LOCAL_MAPS_KEY, [legacy]);
+    const maps = await listLocalMaps();
+    expect(maps[0].folderId).toBeNull();
   });
 });

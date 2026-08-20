@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ConceptCanvas } from './components/ConceptCanvas';
 import { HeaderActions } from './components/HeaderActions';
+import { DocTitle } from './components/DocTitle';
 import { MapsList } from './components/MapsList';
 import { LocalMapsList } from './components/LocalMapsList';
 // 懒加载：弹窗含 react-markdown（重依赖），仅打开时才拉取，减小首屏包体
@@ -167,7 +168,7 @@ export function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <div className="app-header__title">{title}</div>
+        <DocTitle title={title} />
         <div className="app-header__hint">双击空白处新建概念 · 节点拖线连线</div>
         <HeaderActions saveState={saveState} syncMsg={syncMsg} />
       </header>

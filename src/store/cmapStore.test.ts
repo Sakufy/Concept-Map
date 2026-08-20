@@ -597,3 +597,39 @@ describe('焦点路径视图态（pathMode / pathRootId / pathTargetId，不进�
     expect(st.pathTargetId).toBeNull();
   });
 });
+
+describe('概念图标题（setDocTitle）', () => {
+  beforeEach(() => {
+    useCmapStore.setState({
+      doc: createEmptyDocument(),
+      selectedNodeIds: [],
+      selectedEdgeId: null,
+      editingId: null,
+      editingLpId: null,
+      viewport: { x: 0, y: 0, zoom: 1 },
+    });
+    useCmapStore.temporal.getState().clear();
+  });
+
+  it('setDocTitle 更新标题并更新时间戳', () => {
+    const before = new Date(useCmapStore.getState().doc.updatedAt).getTime();
+    useCmapStore.getState().setDocTitle('  高等数学  ');
+    const doc = useCmapStore.getState().doc;
+    expect(doc.title).toBe('高等数学');
+    expect(new Date(doc.updatedAt).getTime()).toBeGreaterThanOrEqual(before);
+  });
+
+  it('setDocTitle 空文本回退默认名', () => {
+    useCmapStore.getState().setDocTitle('   ');
+    expect(useCmapStore.getState().doc.title).toBe('未命名概念图');
+  });
+
+  it('setDocTitle 参与撤销/重做', () => {
+    useCmapStore.getState().setDocTitle('新标题');
+    expect(useCmapStore.getState().doc.title).toBe('新标题');
+    useCmapStore.temporal.getState().undo();
+    expect(useCmapStore.getState().doc.title).toBe('未命名概念图');
+    useCmapStore.temporal.getState().redo();
+    expect(useCmapStore.getState().doc.title).toBe('新标题');
+  });
+});

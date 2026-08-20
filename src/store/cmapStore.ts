@@ -61,6 +61,8 @@ export interface CmapState {
   pathTargetId: string | null;
 
   setDoc: (doc: CmapDocument) => void;
+  /** 重命名当前概念图（更新 doc.title，参与撤销历史与自动保存） */
+  setDocTitle: (title: string) => void;
   setConfig: (patch: Partial<CmapConfig>) => void;
   addConcept: (x: number, y: number, text?: string) => Concept;
   updateConcept: (
@@ -148,6 +150,17 @@ export const useCmapStore = create<CmapState>()(
       pathTargetId: null,
 
       setDoc: (doc) => set({ doc }),
+
+      setDocTitle: (title) => {
+        const trimmed = title.trim();
+        set((s) => ({
+          doc: {
+            ...s.doc,
+            title: trimmed || '未命名概念图',
+            updatedAt: now(),
+          },
+        }));
+      },
 
       setConfig: (patch) => {
         set((s) => ({

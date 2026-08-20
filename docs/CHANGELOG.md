@@ -4,6 +4,61 @@
 
 ## [Unreleased]
 
+### Added (2026-08-20)
+
+#### 概念图重命名 + 我的地图文件夹分组 (`completed`)
+
+用户反馈两个能力缺失：①「现在还无法为概念图命名」；②「我的地图不能创建文件夹」。本轮一次性补齐本地与云端。
+
+**概念图重命名**：
+- 头部标题改为可点击重命名按钮（`DocTitle.tsx` 新建组件）：点击进入内联 input 编辑态，`requestAnimationFrame` 自动聚焦+全选；Enter / 失焦提交，Escape 取消，空文本回退「未命名概念图」。
+- store 新增 `setDocTitle` action（`cmapStore.ts`）：trim + 空回退 + 更新 `doc.title/updatedAt`，参与 zundo 撤销历史 → 自动保存链路（`App.tsx`）自然把新标题写入本地 IndexedDB meta 与云端 `maps.title`，无需单独同步代码。
+- App.css：`.app-header__title` 改按钮样式（hover 背景、✎ 渐显、`ellipsis`）；新增 `.app-header__title-input` 编辑态样式（蓝色边框 + 圆角 + focus 光环）。
+
+**本地文件夹（IndexedDB）**：
+- `persistence.ts` 新增 `LOCAL_FOLDERS_KEY` 存储 `LocalFolderMeta[]`；`LocalMapMeta` 加 `folderId: string | null` 字段（旧数据归一化为 `null` 即根目录）。
+- 单层分组模型：API `listLocalFolders` / `createLocalFolder`（同名去重返回已存在，空名回退「新建文件夹」）/ `deleteLocalFolder`（地图移回根目录，不删图）/ `setLocalMapFolder`。
+- 启动迁移：旧版无 `folderId` 字段的元信息在 `listLocalMaps` 内 `?? null` 归一化，对历史数据零侵入。
+
+**云端文件夹（Supabase）**：
+- 新增迁移 `add_folders`：`alter table public.maps add column if not exists folder_id text;` + `create table public.folders (id uuid default gen_random_uuid(), user_id uuid, name text, created_at timestamptz default now())` + RLS 四条 policy（按 `auth.uid()` 隔离 select/insert/update/delete）。
+- `cloudSync.ts` 增 `listCloudFolders` / `createCloudFolder`（同名去重）/ `deleteCloudFolder`（先 `maps.folder_id=null` 再删 folder 行）/ `setCloudMapFolder`；`createCloudMap` / `listCloudMaps` 增可选 `folderId` 参数，读回 `folder_id` 字段。
+- `authStore.ts` 加 `CloudFolderMeta {id, name}` + `cloudFolders` state + `setCloudFolders` action。
+
+**UI（本地/云端列表共用分组模式，照搬彼此）**：
+- 抽出 `MapItem` 子组件（打开 / 移动到文件夹 select / 删除）。
+- header 加「新建文件夹」按钮 + 内联命名 input（Enter/blur 提交、Escape 取消、自动聚焦）。
+- 文件夹组卡片：「📁 名称 + N 张 + 删除」+ 内嵌子项 list；空文件夹显示「文件夹为空」。
+- 根目录地图平铺在文件夹组下方。
+- `MapsList.tsx`（云端）刷新时并行 `listCloudMaps + listCloudFolders` 写入 `setCloudMaps + setCloudFolders`。
+- 删除文件夹是当前打开的本地图 → 断开 `cloudMapId` 避免自动保存对已删图写回（云端同步版）。
+- `App.css` 新增 `.cm-maps__group` / `__group-head` / `__group-name` / `__group-count` / `__sublist` / `__group-empty` / `__folder-select` / `__folder-input` 等样式（与 LocalMapsList 类名保持一致）。
+
+**测试 + 构建 + 冒烟**：
+- `npx vitest run` **137/137**（+13 持久化文件夹 CRUD 5 + LocalMapsList 分组 4 + cmapStore `setDocTitle` 3 + `DocTitle` 组件 1 + `authStore` 类型修正）。
+- `npm run build` 通过（修了 `authStore.test.ts` mock 缺 `folderId` 字段的 TS2741）。
+- Playwright 冒烟（`smoke-title-folder.js`，playwright-cli `--filename` + `run-code`）：
+  - 重命名：UI 标题变「物理概念图」+ IndexedDB `cmap-local-maps-v1` meta[0].title =「物理概念图」（持久化验证）。
+  - 文件夹：新建「📁 物理」→ 地图 select 选「物理」→ 计数「1 张」→ 删除文件夹（confirm 覆盖）→ 地图移回根目录（`cm-maps__item` = 1）。
+  - 截图 `smoke-title-folder-final.png` 视觉确认分组 UI（白底卡片 / 📁 名称 / 「1 张」/ select 显示当前文件夹）。
+
+**踩坑**：
+- `playwright-cli run-code` 不支持内联文件路径作代码（`smoke` undefined），需用 `--filename <path>` 加载 JS 文件。
+- `run-code` 内 `page.on('dialog')` 与工具 modal state 冲突（`does not handle the modal state`），改用 `window.confirm = () => true` 页面内覆盖；遗留 dialog 需 `playwright-cli dialog-accept` 清掉才能继续。
+- `page.selectOption(ElementHandle, opts)` 报 `selector: expected string, got object` → 改用 `selectOption("[data-testid=...]", opts)` 字符串选择器。
+- button 文字取 `textContent` 含 ✎ span → 断言用 `.app-header__title-text` 子元素。
+
+### Chore (2026-08-20)
+
+#### 部署上线 — 腾讯云 CloudBase 静态托管 (`deployed`)
+
+#### 接入 Git 版本控制并推送 GitHub
+
+- 初始化 git 仓库（`main` 分支），首次提交全部代码（73 文件）→ 清理提交（移除 `.vite/` 缓存与冒烟截图）→ 补充 `.gitignore`（新增 `.vite/`、`.codebuddy/`、冒烟产物 `smoke-*.js/png`、`v2-*.png` 等）。
+- 远程仓库：`origin = https://github.com/Sakufy/Concept-Map.git`，`main` 已推送并设置上游跟踪。
+- 提交规范启用：Conventional Commits（`feat:`/`fix:`/`chore:`/`docs:` 等）。
+- 坑（Windows）：PowerShell 内联中文 commit message 会经 GBK 转码乱码 → **必须用 `git commit -F <msg文件>`**（UTF-8 文件）方式提交，或使用纯 ASCII message。
+
 ### Docs (2026-08-20)
 
 #### 文档体系全面整理 — 建立「文档地图」，统一后续更新入口

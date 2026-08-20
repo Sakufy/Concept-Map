@@ -3,9 +3,10 @@
  *
  * 采用成熟方案：idb-keyval 官方 API（get/set/del）—— 最小封装，不做自研。
  * 多图存储（v2）：
- *   - `cmap-local-maps-v1`  元信息列表（LocalMapMeta[]，供列表页展示）
- *   - `cmap-local-map-{id}` 每张图的完整 CmapDocument
- *   - `cmap-local-last-id`  上次打开的本地图 id（启动时恢复）
+ *   - `cmap-local-maps-v1`    元信息列表（LocalMapMeta[]，供列表页展示）
+ *   - `cmap-local-folders-v1` 文件夹列表（LocalFolderMeta[]，供「我的地图」分组）
+ *   - `cmap-local-map-{id}`   每张图的完整 CmapDocument
+ *   - `cmap-local-last-id`    上次打开的本地图 id（启动时恢复）
  * 旧版单文档（cmap-doc-v1）在启动时自动迁移为第一张本地地图。
  */
 import { get, set, del } from 'idb-keyval';
@@ -15,8 +16,17 @@ import { CMAP_SCHEMA_VERSION, createEmptyDocument, type CmapDocument } from './t
 export const DOC_KEY = 'cmap-doc-v1';
 /** 本地地图元信息列表 key */
 export const LOCAL_MAPS_KEY = 'cmap-local-maps-v1';
+/** 本地文件夹列表 key */
+export const LOCAL_FOLDERS_KEY = 'cmap-local-folders-v1';
 /** 上次打开的本地图 id key */
 export const LAST_LOCAL_MAP_KEY = 'cmap-local-last-id';
+
+/** 本地文件夹元信息（单层分组，地图可属于 0..1 个文件夹） */
+export interface LocalFolderMeta {
+  id: string;
+  name: string;
+  createdAt: string;
+}
 
 /** 本地地图元信息（列表页展示用，不存整图） */
 export interface LocalMapMeta {
@@ -24,6 +34,8 @@ export interface LocalMapMeta {
   title: string;
   createdAt: string;
   updatedAt: string;
+  /** 所属文件夹 id（null = 根目录，旧数据无此字段视为 null） */
+  folderId: string | null;
 }
 
 const localMapDocKey = (id: string) => `cmap-local-map-${id}`;
@@ -67,10 +79,65 @@ async function writeLocalMapsMeta(meta: LocalMapMeta[]): Promise<void> {
   await set(LOCAL_MAPS_KEY, meta);
 }
 
-/** 列出全部本地地图元信息，最近更新在前 */
+// ---------------------------------------------------------------------------
+// 本地文件夹管理（「我的地图」分组，单层结构）
+// ---------------------------------------------------------------------------
+
+async function readLocalFolders(): Promise<LocalFolderMeta[]> {
+  try {
+    const folders = await get<LocalFolderMeta[]>(LOCAL_FOLDERS_KEY);
+    return Array.isArray(folders) ? folders : [];
+  } catch {
+    return [];
+  }
+}
+
+/** 列出全部本地文件夹（按创建时间倒序） */
+export async function listLocalFolders(): Promise<LocalFolderMeta[]> {
+  const folders = await readLocalFolders();
+  return folders.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
+/** 新建本地文件夹（去重：同名文件夹返回已存在的） */
+export async function createLocalFolder(name: string): Promise<LocalFolderMeta> {
+  const trimmed = name.trim();
+  const all = await readLocalFolders();
+  const existing = all.find((f) => f.name === trimmed);
+  if (existing) return existing;
+  const folder: LocalFolderMeta = {
+    id: `folder-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    name: trimmed || '新建文件夹',
+    createdAt: new Date().toISOString(),
+  };
+  await writeLocalFolders([folder, ...all]);
+  return folder;
+}
+
+async function writeLocalFolders(folders: LocalFolderMeta[]): Promise<void> {
+  await set(LOCAL_FOLDERS_KEY, folders);
+}
+
+/** 删除本地文件夹（文件夹内地图移回根目录，不删除地图） */
+export async function deleteLocalFolder(id: string): Promise<void> {
+  const folders = await readLocalFolders();
+  await writeLocalFolders(folders.filter((f) => f.id !== id));
+  const maps = await readLocalMapsMeta();
+  const moved = maps.map((m) => (m.folderId === id ? { ...m, folderId: null } : m));
+  await writeLocalMapsMeta(moved);
+}
+
+/** 把某张本地地图移动到文件夹（null = 根目录） */
+export async function setLocalMapFolder(mapId: string, folderId: string | null): Promise<void> {
+  const maps = await readLocalMapsMeta();
+  await writeLocalMapsMeta(maps.map((m) => (m.id === mapId ? { ...m, folderId } : m)));
+}
+
+/** 列出全部本地地图元信息，最近更新在前（旧数据无 folderId 视为根目录） */
 export async function listLocalMaps(): Promise<LocalMapMeta[]> {
   const meta = await readLocalMapsMeta();
-  return meta.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  return meta
+    .map((m) => ({ ...m, folderId: m.folderId ?? null }))
+    .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
 }
 
 /** 新建本地空地图 → 写文档 + 元信息 + 设为最近打开，返回新文档 */
@@ -81,6 +148,7 @@ export async function createLocalMap(title = '未命名概念图'): Promise<Cmap
     title: doc.title,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
+    folderId: null,
   };
   const all = await readLocalMapsMeta();
   await writeLocalMapsMeta([meta, ...all]);
@@ -111,6 +179,7 @@ export async function saveLocalMap(doc: CmapDocument): Promise<boolean> {
       title: doc.title,
       createdAt: existing?.createdAt ?? doc.createdAt,
       updatedAt: doc.updatedAt,
+      folderId: existing?.folderId ?? null,
     };
     await writeLocalMapsMeta([meta, ...all.filter((m) => m.id !== doc.id)]);
     await set(localMapDocKey(doc.id), doc);
@@ -173,6 +242,7 @@ export async function migrateLegacyDocument(): Promise<CmapDocument | null> {
       title: legacy.title,
       createdAt: legacy.createdAt,
       updatedAt: legacy.updatedAt,
+      folderId: null,
     };
     await writeLocalMapsMeta([meta, ...all]);
     await set(localMapDocKey(legacy.id), legacy);

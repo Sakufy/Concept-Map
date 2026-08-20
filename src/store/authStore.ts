@@ -16,12 +16,21 @@ export interface CloudMapMeta {
   id: string;
   title: string;
   updatedAt: string;
+  /** 所属文件夹 id（null = 根目录） */
+  folderId: string | null;
+}
+
+export interface CloudFolderMeta {
+  id: string;
+  name: string;
 }
 
 interface AuthState {
   user: CloudUser | null;
   uiMode: 'editor' | 'maps' | 'local';
   cloudMaps: CloudMapMeta[];
+  /** 云端文件夹列表（「我的地图」分组用） */
+  cloudFolders: CloudFolderMeta[];
   cloudMapId: string | null;
   /** 最近一次从云端读取/写入得到的 updated_at（冲突检测用） */
   cloudUpdatedAt: string | null;
@@ -31,6 +40,7 @@ interface AuthState {
   setUser: (user: CloudUser | null) => void;
   setUiMode: (mode: 'editor' | 'maps' | 'local') => void;
   setCloudMaps: (maps: CloudMapMeta[]) => void;
+  setCloudFolders: (folders: CloudFolderMeta[]) => void;
   setCloudMapId: (id: string | null) => void;
   setCloudUpdatedAt: (at: string | null) => void;
   setAuthReady: (ready: boolean) => void;
@@ -40,6 +50,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   uiMode: 'editor',
   cloudMaps: [],
+  cloudFolders: [],
   cloudMapId: null,
   cloudUpdatedAt: null,
   authReady: false,
@@ -47,6 +58,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user }),
   setUiMode: (uiMode) => set({ uiMode }),
   setCloudMaps: (cloudMaps) => set({ cloudMaps }),
+  setCloudFolders: (cloudFolders) => set({ cloudFolders }),
   setCloudMapId: (cloudMapId) => set({ cloudMapId }),
   setCloudUpdatedAt: (cloudUpdatedAt) => set({ cloudUpdatedAt }),
   setAuthReady: (authReady) => set({ authReady }),
