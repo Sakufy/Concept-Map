@@ -1,0 +1,40 @@
+{
+  "name": "concept-map",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "概念地图软件（对标 Lynkage）—— Web/PWA 概念图绘制工具",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
+    "@xyflow/react": "^12.3.5",
+    "dagre": "^0.8.5",
+    "html-to-image": "^1.11.13",
+    "idb-keyval": "^6.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "zundo": "^2.3.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.6.5",
+    "@types/dagre": "^0.7.54",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "vitest": "^3.2.7"
+  }
+}

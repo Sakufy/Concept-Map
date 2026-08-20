@@ -1,0 +1,1115 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 16px;
+  background: #2b3a55;
+  color: #fff;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.app-header__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.app-header__hint {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* ---- 头部操作区（保存状态 + 导入导出） ---- */
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.app-header__save-state {
+  font-size: 12px;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.app-header__btn {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.app-header__btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.app-main {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.cm-canvas {
+  background: #fafafa;
+}
+
+/* 深色主题：画布背景 + 网格点由 Background color prop 联动 */
+.cm-canvas.is-dark {
+  background: #0f172a;
+}
+
+.cm-canvas__minimap {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.cm-canvas.is-dark .cm-canvas__minimap {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+/* ---- 画布工具栏 ---- */
+.cm-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 4px;
+  z-index: 10;
+}
+
+.cm-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cm-toolbar__group + .cm-toolbar__group {
+  border-left: 1px solid #e2e8f0;
+  padding-left: 8px;
+}
+
+.cm-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  min-width: 44px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #334155;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.cm-toolbar__btn:hover {
+  background: #f1f5f9;
+}
+
+.cm-toolbar__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  background: transparent;
+}
+
+.cm-toolbar__btn.is-active {
+  background: #1976d2;
+  color: #fff;
+}
+
+.cm-toolbar__icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.cm-toolbar__label {
+  font-weight: 500;
+}
+
+.cm-toolbar__zoom {
+  min-width: 52px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+  user-select: none;
+}
+
+/* ---- 概念节点 ---- */
+.react-flow__node-concept {
+  padding: 0;
+}
+
+.cm-node {
+  /* 尺寸随文字自适应：不传 width/height 时 React Flow 自动测量，
+     盒子 shrink-wrap 包裹文字，max-width 触发长文本换行 */
+  width: max-content;
+  height: max-content;
+  min-width: 56px;
+  min-height: 32px;
+  max-width: 240px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid #1976d2;
+  background: #e3f2fd;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  line-height: 1.45;
+  color: #1e293b;
+  cursor: grab;
+  transition: box-shadow 0.15s ease;
+}
+
+.cm-node.is-selected {
+  box-shadow:
+    0 0 0 2px #1976d2,
+    0 4px 12px rgba(25, 118, 210, 0.25);
+}
+
+/* 编辑态：临时允许文本溢出节点框，保证正在输入的内容完整可见 */
+.cm-node.is-editing {
+  overflow: visible;
+}
+
+.cm-node:active {
+  cursor: grabbing;
+}
+
+/* 嵌入式子节点：缩小版 chip（对齐 Lynkage 嵌入式节点样式） */
+.cm-node--embedded {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* 包含子节点的父节点：虚线边框提示可拖入/拖出子节点 */
+.cm-node--has-children {
+  border-style: dashed;
+}
+
+.cm-node__text {
+  min-height: 1.2em;
+  white-space: pre-wrap;
+  word-break: break-word;
+  outline: none;
+}
+
+.cm-node__text.is-editing {
+  cursor: text;
+}
+
+/* 连接热区（对齐 Lynkage cmp-entity-drag-line-area：整节点可拖线）：
+   Handle 本身是覆盖四边 16px 厚的透明热区，命中面远大于小圆点；
+   节点 hover / 选中时淡入边带中央的小圆点作为拖线提示。
+   节点中心区域仍保留给移动/编辑，避免与拖线冲突。 */
+.cm-node__handle {
+  width: 10px;
+  height: 100%;
+  top: 0;
+  opacity: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  z-index: 3;
+  transition: opacity 0.15s ease;
+}
+
+/* 覆盖 React Flow 官方 handle 定位（.react-flow__handle-top 等带 translate 位移，需归零） */
+.cm-node__handle--top,
+.cm-node__handle--bottom,
+.cm-node__handle--left,
+.cm-node__handle--right {
+  transform: none;
+}
+
+.cm-node__handle--top {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 10px;
+}
+
+.cm-node__handle--bottom {
+  top: auto;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 10px;
+}
+
+.cm-node__handle--left {
+  left: 0;
+  width: 10px;
+  height: 100%;
+}
+
+.cm-node__handle--right {
+  right: 0;
+  width: 10px;
+  height: 100%;
+}
+
+/* 视觉提示圆点：默认隐藏，hover/选中节点时出现 */
+.cm-node__handle::before {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #94a3b8;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cm-node__handle--top::before {
+  left: 50%;
+  top: 3px;
+  transform: translateX(-50%);
+}
+
+.cm-node__handle--bottom::before {
+  left: 50%;
+  bottom: 3px;
+  transform: translateX(-50%);
+}
+
+.cm-node__handle--left::before {
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+}
+
+.cm-node__handle--right::before {
+  top: 50%;
+  right: 3px;
+  transform: translateY(-50%);
+}
+
+.cm-node:hover .cm-node__handle,
+.cm-node.is-selected .cm-node__handle {
+  opacity: 1;
+}
+
+.cm-node__handle:hover::before {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.18);
+}
+
+/* ---- 连词节点（Lynkage 风格胶囊，独立可编辑/可连线） ---- */
+.cm-lp {
+  /* 尺寸随文字自适应（React Flow 自动测量），胶囊包裹文字，长文本在 max-width 处换行 */
+  width: max-content;
+  height: max-content;
+  min-width: 64px;
+  min-height: 26px;
+  max-width: 200px;
+  box-sizing: border-box;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1.5px solid #94a3b8;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #334155;
+  text-align: center;
+  overflow: hidden;
+  cursor: grab;
+  transition: box-shadow 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cm-lp:active {
+  cursor: grabbing;
+}
+
+/* 编辑态：临时允许文本溢出胶囊，保证正在输入的内容完整可见 */
+.cm-lp:focus-within {
+  overflow: visible;
+}
+
+.cm-lp.is-selected {
+  box-shadow:
+    0 0 0 2px #1976d2,
+    0 4px 12px rgba(25, 118, 210, 0.25);
+}
+
+/* 连线清晰度专项：连词节点未选中/未悬停时视觉弱化，减少碎片感 */
+.cm-lp:not(.is-selected):not(:hover) {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: #cbd5e1;
+  box-shadow: none;
+  opacity: 0.85;
+}
+
+/* 焦点路径上的连词恢复醒目（规则置于弱化规则之后以覆盖） */
+.cm-lp.is-path {
+  opacity: 1;
+  background: #fff;
+  border-color: #1976d2;
+  box-shadow:
+    0 0 0 3px rgba(25, 118, 210, 0.3),
+    0 4px 12px rgba(25, 118, 210, 0.25);
+}
+
+.cm-lp__text {
+  min-height: 1.2em;
+  white-space: pre-wrap;
+  word-break: break-word;
+  outline: none;
+}
+
+.cm-lp__text.is-editing {
+  cursor: text;
+}
+
+.cm-lp:hover .cm-node__handle,
+.cm-lp.is-selected .cm-node__handle {
+  opacity: 1;
+}
+
+/* 连词节点热区略薄，避免遮挡胶囊 */
+.cm-lp .cm-node__handle--top,
+.cm-lp .cm-node__handle--bottom {
+  height: 8px;
+}
+
+/* ---- 概念连线 ---- */
+.cm-edge__line {
+  stroke: #b6c2d1;
+  stroke-width: 1.5;
+}
+
+.cm-edge__line.is-selected {
+  stroke: #1976d2;
+  stroke-width: 2.2;
+}
+
+/* 连线清晰度专项：hover 反馈 —— 常亮边加深 + 虚线流动动画强化方向感 */
+.react-flow__edge:hover .cm-edge__line:not(.is-path):not(.is-dimmed) {
+  stroke: #475569;
+  stroke-width: 2.2;
+  stroke-dasharray: 8 6;
+  animation: cm-dash-flow 0.6s linear infinite;
+}
+
+@keyframes cm-dash-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+/* 连线清晰度专项：焦点路径高亮（蓝色加粗 + 箭头已由 markerEnd 变色） */
+.cm-edge__line.is-path {
+  stroke: #1976d2;
+  stroke-width: 2.6;
+}
+
+/* 连线清晰度专项：非路径边整体淡化 */
+.cm-edge__line.is-dimmed {
+  stroke: #cbd5e1;
+  opacity: 0.35;
+}
+
+/* 焦点路径顺序编号徽标（EdgeLabelRenderer 内，view 坐标系已 translate+scale） */
+.cm-edge__order-badge {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1976d2;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.5);
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* 连线清晰度专项：焦点路径节点高亮（内联 borderColor 不受 CSS 覆盖，用光圈提示） */
+.cm-node.is-path {
+  box-shadow:
+    0 0 0 3px rgba(25, 118, 210, 0.35),
+    0 4px 12px rgba(25, 118, 210, 0.25);
+}
+
+/* 连线清晰度专项：非路径节点/连词淡化 */
+.cm-node.is-dimmed,
+.cm-lp.is-dimmed {
+  opacity: 0.22;
+}
+
+/* 焦点路径顺序编号徽标（EdgeLabelRenderer 内）：
+   EdgeLabelRenderer 容器在 DOM 中位于 nodes 之前，需提升层级避免徽标被节点遮挡 */
+.react-flow__edgelabel-renderer {
+  z-index: 10;
+}
+
+/* ---- 节点样式面板（配色 + 字号） ---- */
+.cm-style-panel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+}
+
+.cm-style-panel__group-label {
+  font-size: 12px;
+  color: #64748b;
+  user-select: none;
+}
+
+.cm-style-panel__swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.cm-style-panel__swatch:hover {
+  transform: scale(1.15);
+}
+
+.cm-style-panel__swatch.is-active {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.18);
+}
+
+.cm-style-panel__divider {
+  width: 1px;
+  height: 20px;
+  background: #e2e8f0;
+}
+
+.cm-style-panel__btn {
+  min-width: 32px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.cm-style-panel__btn:hover {
+  background: #e2e8f0;
+}
+
+.cm-style-panel__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cm-style-panel__size {
+  min-width: 38px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+  user-select: none;
+}
+
+/* ---- 底部统计栏 ---- */
+.cm-stats {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  font-size: 12px;
+  color: #64748b;
+  user-select: none;
+}
+
+.cm-canvas.is-dark .cm-stats {
+  background: rgba(30, 41, 59, 0.92);
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.cm-stats__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.cm-stats__num {
+  font-weight: 700;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: #334155;
+}
+
+.cm-canvas.is-dark .cm-stats__num {
+  color: #e2e8f0;
+}
+
+.cm-stats__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.cm-stats__btn:hover {
+  background: #e2e8f0;
+}
+
+.cm-canvas.is-dark .cm-stats__btn {
+  background: #334155;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+.cm-stats__btn[aria-pressed='true'] {
+  background: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+/* 窄屏：隐藏统计按钮文字 */
+@media (max-width: 480px) {
+  .cm-stats__btn-label {
+    display: none;
+  }
+}
+
+/* 窄屏：隐藏文字只留图标 */
+@media (max-width: 480px) {
+  .cm-toolbar__label {
+    display: none;
+  }
+  .cm-toolbar__btn {
+    min-width: 40px;
+    padding: 6px 8px;
+  }
+}
+
+/* ---- 云同步：头部用户/同步提示 ---- */
+.app-header__user {
+  max-width: 180px;
+  font-size: 12px;
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-header__sync-msg {
+  font-size: 12px;
+  color: #fbbf24;
+}
+
+/* ---- 登录/注册弹窗 ---- */
+.cm-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.cm-modal {
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  padding: 24px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.25);
+}
+
+.cm-modal__title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.cm-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cm-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.cm-modal__field input {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.cm-modal__field input:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+}
+
+.cm-modal__error {
+  margin: 0;
+  font-size: 12px;
+  color: #d32f2f;
+}
+
+.cm-modal__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.cm-modal__primary {
+  flex: 1;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: #1976d2;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cm-modal__primary:hover {
+  background: #1565c0;
+}
+
+.cm-modal__primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cm-modal__ghost {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cm-modal__ghost:hover {
+  background: #f8fafc;
+}
+
+.cm-modal__switch {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.cm-modal__link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #1976d2;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ---- 右键弹窗编辑（长文本 + Markdown 预览） ---- */
+.cm-edit {
+  width: 560px;
+  max-width: calc(100vw - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cm-edit__tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cm-edit__tab {
+  padding: 6px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cm-edit__tab.is-active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.cm-edit__hint {
+  margin-left: auto;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.cm-edit__area {
+  width: 100%;
+  height: 320px;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #0f172a;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.cm-edit__area:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+}
+
+.cm-edit__preview {
+  width: 100%;
+  height: 320px;
+  padding: 12px 16px;
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #0f172a;
+  box-sizing: border-box;
+}
+
+.cm-edit__preview h1,
+.cm-edit__preview h2,
+.cm-edit__preview h3 {
+  margin: 8px 0 4px;
+  line-height: 1.3;
+}
+
+.cm-edit__preview p {
+  margin: 4px 0;
+}
+
+.cm-edit__preview ul,
+.cm-edit__preview ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.cm-edit__preview code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  font-size: 13px;
+}
+
+.cm-edit__preview pre {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #e2e8f0;
+  overflow: auto;
+}
+
+.cm-edit__preview pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+}
+
+.cm-edit__preview a {
+  color: #1976d2;
+}
+
+.cm-edit__preview blockquote {
+  margin: 6px 0;
+  padding: 2px 12px;
+  border-left: 3px solid #cbd5e1;
+  color: #475569;
+}
+
+.cm-edit__preview table {
+  border-collapse: collapse;
+  margin: 6px 0;
+}
+
+.cm-edit__preview th,
+.cm-edit__preview td {
+  padding: 4px 10px;
+  border: 1px solid #cbd5e1;
+}
+
+/* ---- 版本历史面板 ---- */
+.cm-versions {
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cm-versions__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cm-versions__header h3 {
+  flex: 1;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cm-versions__hint {
+  margin: 0;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.cm-versions__list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: auto;
+  min-height: 120px;
+}
+
+.cm-versions__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.cm-versions__item:hover {
+  border-color: #cbd5e1;
+}
+
+.cm-versions__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cm-versions__time {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.cm-versions__stat {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.cm-versions__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ---- 我的地图（云端列表） ---- */
+.cm-maps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: #f8fafc;
+  overflow: auto;
+}
+
+.cm-maps__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cm-maps__header h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.cm-maps__btn {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cm-maps__btn:hover {
+  background: #f1f5f9;
+}
+
+.cm-maps__btn--primary {
+  background: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+.cm-maps__btn--primary:hover {
+  background: #1565c0;
+}
+
+.cm-maps__btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cm-maps__error {
+  margin: 0;
+  font-size: 13px;
+  color: #d32f2f;
+}
+
+.cm-maps__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 720px;
+}
+
+.cm-maps__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.cm-maps__item:hover {
+  border-color: #cbd5e1;
+}
+
+.cm-maps__open {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cm-maps__title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.cm-maps__time {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.cm-maps__del {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff;
+  color: #dc2626;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cm-maps__del:hover {
+  background: #fef2f2;
+}
+
+.cm-maps__del:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cm-maps__empty {
+  padding: 24px;
+  font-size: 13px;
+  color: #94a3b8;
+}

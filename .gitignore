@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Editor
+.vscode/
+.idea/
+*.local
+
+# Environment (contains Supabase keys)
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright CLI snapshots (analysis temp)
+.playwright-cli/
+
+# Working memory / internal tooling (not for public repo)
+.codebuddy/
+
+# Dev smoke artifacts
+smoke-*.js
+smoke-*.png
+phase*.png
+fix-connect.png
+hover-nodeA.png

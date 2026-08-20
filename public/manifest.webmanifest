@@ -1,0 +1,11 @@
+{
+  "name": "概念地图",
+  "short_name": "概念地图",
+  "description": "自由绘制概念地图：无限画布、概念节点、连词与连接线",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2b3a55",
+  "lang": "zh-CN",
+  "icons": []
+}
