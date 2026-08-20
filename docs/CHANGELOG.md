@@ -4,6 +4,30 @@
 
 ## [Unreleased]
 
+### Refactor (2026-08-20)
+
+#### 整体观感统一 — 设计 token + 浅色 Header + 主动态浅蓝 + 磨砂玻璃 (user-requested: "简约、高端的感觉。整体要风格统一")
+
+针对截图反馈「整理功能 UI 布局 + 整体观感需优化」，按「简约、高端、风格统一」方向做全量系统化改造：
+
+- **设计 token 统一**：`:root` 定义 CSS 变量（`--cm-accent` / `--cm-border` / `--cm-shadow-sm` / `--cm-shadow-md` / `--cm-radius`），全局替换硬编码色值与阴影，后续改色只动 token。
+- **浅色 Header**：旧深蓝 `#2b3a55` 整块底 → Notion 风白底 `#fff` + 细描边 + 柔和阴影；深色主题下 `.app.is-dark .app-header` 深度适配（`App.tsx` 根 div 增 `is-dark` 类，随 `doc.config.theme` 切换）。
+- **主动态重构**：工具栏按钮从整块蓝底 → 浅蓝底 + 蓝字 + 细内环（base `#eff6ff` / hover `#dbeafe`）；深色画布下回退深蓝底。
+- **磨砂玻璃**：工具栏 / 统计栏 `rgba(255,255,255,0.9)` + `backdrop-filter: blur(8px)`，深色主题同步适配。
+- **整理下拉修复**：菜单 `left:0` → `right:0` 与 caret 对齐；文案直白化（「不缩放视图」/「自动缩放视图」）；图标 + 三段布局 + `cm-menu-in` 入场动画。
+- **主色系统化迁移**：`#1976d2→#2563eb`、`#e3f2fd→#eff6ff`、`#1565c0→#1d4ed8`（App.css + `cmapStore` 默认节点样式 + `NodeStylePanel` 默认色板 + `ConceptCanvas` marker/连接线/点阵/minimap 同步）。
+- 测试 137/137 全绿、`npm run build` 通过。
+- Playwright 冒烟（本地 `smoke-v2-ui.js` 16 断言 + 线上 `smoke-v2-online.js` 15 断言）全绿：浅色 Header / 保存 chip / 主动态浅蓝 / 整理菜单右对齐+图标+新文案 / 统计栏磨砂玻璃 / 新主色节点 / 深色主题 Header。
+- **踩坑（写入经验库）**：① playwright-cli `run-code` 期望**函数表达式** `async page => {}` 而非任意脚本（`SyntaxError: Unexpected token 'const'`）；② dev 冒烟 IndexedDB 会恢复上一轮旧色节点，按色值断言节点会失败 → 按唯一文本定位新节点；③ `uploadFiles` 必须绝对路径（相对路径解析到 IDE 安装目录报「路径不存在」）；④ 点击后鼠标停留触发 hover 色 ≠ base 色 → 断言放宽为两种蓝系或先 `page.mouse.move(2,2)` 移开。
+
+### Deploy (2026-08-20)
+
+#### 部署整体观感优化到 CloudBase 静态托管 (`deployed`)
+
+- `npm run build`（137/137 测试全绿）→ `uploadFiles(localPath=d:\AI\概念地图项目\dist, cloudPath=/)` 上传 9 个文件全 200（**uploadFiles 必须用绝对路径**，相对路径会被解析到 IDE 安装目录）。
+- 线上验证：`curl | findstr assets` 确认线上 HTML 引用 `index-D1wko2Np.js` + `index-BEU2NXO3.css` 与本地 dist 一致。
+- 线上冒烟：`smoke-v2-online.js` 15 项全绿（浅色 Header / 主动态浅蓝 / 整理菜单右对齐+图标 / 统计栏磨砂玻璃 / 新主色节点 / 深色主题 Header）。
+
 ### Deploy (2026-08-20)
 
 #### 部署 UI 清爽化到 CloudBase 静态托管 (`deployed`)

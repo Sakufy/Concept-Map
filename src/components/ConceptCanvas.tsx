@@ -151,7 +151,7 @@ function toFlowEdges(
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: isPath ? '#1976d2' : isDimmed ? '#cbd5e1' : '#b6c2d1',
+        color: isPath ? '#2563eb' : isDimmed ? '#cbd5e1' : '#c3cbda',
         width: 14,
         height: 14,
       },
@@ -536,7 +536,7 @@ export function ConceptCanvas() {
       // 整节点可拖线：Loose 模式允许任意 Handle 作为起点/终点；connectionRadius 加大吸附容错
       connectionMode={ConnectionMode.Loose}
       connectionRadius={24}
-      connectionLineStyle={{ stroke: '#64b5f6', strokeWidth: 1.5, strokeDasharray: '6 4' }}
+      connectionLineStyle={{ stroke: '#93c5fd', strokeWidth: 1.5, strokeDasharray: '6 4' }}
       onPaneClick={handlePaneClick}
       onDoubleClick={handleDoubleClick}
       onTouchStart={handlePaneTouchStart}
@@ -560,9 +560,9 @@ export function ConceptCanvas() {
     >
       <Background
         variant={BackgroundVariant.Dots}
-        gap={24}
-        size={1.5}
-        color={isDark ? '#334155' : '#d1d5db'}
+        gap={28}
+        size={1.2}
+        color={isDark ? '#334155' : '#d8dde5'}
       />
       <MiniMap
         pannable
@@ -573,7 +573,7 @@ export function ConceptCanvas() {
           if (concept) return concept.style.fill;
           return '#94a3b8'; // 连词节点：灰色
         }}
-        maskColor={isDark ? 'rgba(15, 23, 42, 0.5)' : 'rgba(43, 58, 85, 0.08)'}
+        maskColor={isDark ? 'rgba(15, 23, 42, 0.5)' : 'rgba(15, 23, 42, 0.06)'}
       />
       <Controls showInteractive={false} />
       <CanvasToolbar />

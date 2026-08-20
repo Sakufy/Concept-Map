@@ -218,16 +218,18 @@ export function CanvasToolbar() {
                 className="cm-toolbar__menu-item"
                 onClick={() => handleAutoLayout(false)}
               >
-                分层整理
-                <span className="cm-toolbar__menu-hint">可撤销</span>
+                <IconLayoutGrid />
+                <span className="cm-toolbar__menu-text">分层整理</span>
+                <span className="cm-toolbar__menu-hint">不缩放视图</span>
               </button>
               <button
                 type="button"
                 className="cm-toolbar__menu-item"
                 onClick={() => handleAutoLayout(true)}
               >
-                整理并适应
-                <span className="cm-toolbar__menu-hint">重排后缩放视图</span>
+                <IconMaximize2 />
+                <span className="cm-toolbar__menu-text">整理并适应</span>
+                <span className="cm-toolbar__menu-hint">自动缩放视图</span>
               </button>
             </div>
           )}

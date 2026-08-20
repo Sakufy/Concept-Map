@@ -26,6 +26,8 @@ import './App.css';
 
 export function App() {
   const title = useCmapStore((s) => s.doc.title);
+  // 主题驱动根节点 class（Header 深色适配依赖 .app.is-dark）
+  const isDark = useCmapStore((s) => s.doc.config.theme === 'dark');
   const uiMode = useAuthStore((s) => s.uiMode);
   const [saveState, setSaveState] = useState<'saving' | 'saved'>('saved');
   const [syncMsg, setSyncMsg] = useState('');
@@ -166,7 +168,7 @@ export function App() {
   }, []);
 
   return (
-    <div className="app">
+    <div className={`app${isDark ? ' is-dark' : ''}`}>
       <header className="app-header">
         <DocTitle title={title} />
         <div className="app-header__hint">双击空白处新建概念 · 节点拖线连线</div>

@@ -20,8 +20,8 @@ import { absolutePosition, getAnchor } from '../geometry';
 
 /** 概念节点默认样式 */
 export const DEFAULT_CONCEPT_STYLE = {
-  fill: '#e3f2fd',
-  borderColor: '#1976d2',
+  fill: '#eff6ff',
+  borderColor: '#2563eb',
   fontSize: 16,
 };
 

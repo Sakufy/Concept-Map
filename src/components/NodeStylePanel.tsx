@@ -7,7 +7,7 @@ import { useCmapStore } from '../store/cmapStore';
 
 /** 预设色板（Lynkage 风格柔和色块） */
 export const NODE_COLORS: { name: string; fill: string; border: string }[] = [
-  { name: '蓝', fill: '#e3f2fd', border: '#1976d2' },
+  { name: '蓝', fill: '#eff6ff', border: '#2563eb' },
   { name: '绿', fill: '#e8f5e9', border: '#388e3c' },
   { name: '橙', fill: '#fff3e0', border: '#f57c00' },
   { name: '粉', fill: '#fce4ec', border: '#c2185b' },
